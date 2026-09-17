@@ -1,6 +1,7 @@
+import os
 import sqlite3
 
-conn = sqlite3.connect('database.db')
+conn = sqlite3.connect(os.environ.get('DATABASE_PATH', 'database.db'))
 c = conn.cursor()
 
 c.execute('''CREATE TABLE IF NOT EXISTS valores (
