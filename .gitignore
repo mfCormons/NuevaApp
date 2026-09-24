@@ -4,3 +4,4 @@ database.db
 .atl/
 .vscode/
 *.session.sql
+clavesDB.txt

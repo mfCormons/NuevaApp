@@ -33,6 +33,18 @@ Levantar NuevaApp como web app de producción estándar con PostgreSQL como moto
   - [x] Post-reinicio needrestart (OK accidental): 22 servicios reiniciados, 0 failed; mysql/nginx/postgresql `active`
   - [x] Crear rol+base `nuevaapp` en el server (usuario dedicado, menor privilegio)
   - [x] Verificar conexión TCP `-h 127.0.0.1` (misma que usará la app) — `current_user=nuevaapp | current_database=nuevaapp`
+  - [x] `git merge feature/postgres-local → master` + `git push origin master` (d4e970a) — el server clona desde GitHub
+  - [x] Clonar repo en `/home/cormons/NuevaApp`, venv + `pip install -r requirements.txt` (Python 3.10.12)
+  - [x] Seed en el server OK — tabla `valores` con 5 filas (lección: put ref — DATABASE_URL con PGPASSWORD aparte, no clave en URL por `/` de base64)
+  - [x] Prueba gunicorn en 127.0.0.1:8008 (foreground) — `/health` → ok, `/api/consultar?numero=1` → Valor 1
+- [x] Crear unit systemd `gunicorn_nuevaapp.service` + EnvironmentFile con credenciales
+  - Aprendizaje: `status=217/USER` = el usuario del unit no existe → corregir a `www-data` (patrón real del server) + `chown -R www-data:www-data` sobre el repo
+- [x] nginx server block (subdominio `nuevaapp.cormons.app` — confirmado 2026-09-24) + certbot HTTPS
+  - Patrón: `proxy_pass http://127.0.0.1:8008` + cabeceras; sin static/media (Flask sirve todo); certbot agrega 443 + redirect 80→443
+  - DNS A record en Hostinger: `nuevaapp` → `69.62.95.88` (tardó minutos en propagar)
+  - Certificado válido hasta 2026-12-23, renovación automática configurada
+  - Verificado: `curl https://nuevaapp.cormons.app/health` → `{"status":"ok"}`
+- [ ] ufw / reinicio kernel 5.15.0-191 en ventana de mantenimiento (el dueño elige cuándo)
 - Reboot del kernel (5.15.0-164 → 5.15.0-191) queda PENDIENTE: se elige ventana de mantenimiento al final del deploy.
 
 ## Constraints
