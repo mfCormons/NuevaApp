@@ -1,15 +1,14 @@
 from flask import Flask, jsonify, render_template, request
-import sqlite3
+import psycopg
+from psycopg.rows import dict_row
 import os
 
 app = Flask(__name__)
-app.config['DATABASE'] = os.environ.get('DATABASE_PATH', 'database.db')
+app.config['DATABASE_URL'] = os.environ.get('DATABASE_URL', 'postgresql://nuevaapp:nuevaapp_dev@127.0.0.1:5432/nuevaapp')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'mysecretkey')
 
 def get_db():
-    conn = sqlite3.connect(app.config['DATABASE'])
-    conn.row_factory = sqlite3.Row
-    return conn
+    return psycopg.connect(app.config['DATABASE_URL'], row_factory=dict_row)
 
 @app.route('/')
 def index():
@@ -23,12 +22,12 @@ def consultar():
     conn = get_db()
     try:
         c = conn.cursor()
-        c.execute('SELECT valor FROM valores WHERE numero = ?', (numero,))
+        c.execute('SELECT valor FROM valores WHERE numero = %s', (numero,))
         fila = c.fetchone()
     finally:
         conn.close()
     if fila:
-        return {'valor': fila[0]}
+        return {'valor': fila['valor']}
     return jsonify({'error': 'Número no encontrado'}), 404
 
 @app.route('/health')

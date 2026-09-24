@@ -1,7 +1,7 @@
 import os
-import sqlite3
+import psycopg
 
-conn = sqlite3.connect(os.environ.get('DATABASE_PATH', 'database.db'))
+conn = psycopg.connect(os.environ.get('DATABASE_URL', 'postgresql://nuevaapp:nuevaapp_dev@127.0.0.1:5432/nuevaapp'))
 c = conn.cursor()
 
 c.execute('''CREATE TABLE IF NOT EXISTS valores (
@@ -17,7 +17,7 @@ datos = [
     (5, 'Valor 5')
 ]
 c.execute("DELETE FROM valores")
-c.executemany('INSERT INTO valores (numero, valor) VALUES (?, ?)', datos)
+c.executemany('INSERT INTO valores (numero, valor) VALUES (%s, %s)', datos)
 
 conn.commit()
 conn.close()
