@@ -22,9 +22,9 @@ primera pata de la estrategia DUAL de alimentación (API + ODBC).
 - Convenciones: commit Conventional, sin atribución AI.
 
 ## Tareas
-- [ ] Implementar `POST /api/valores` en `app.py` (single + lote, validación, upsert)
-- [ ] Verificar: POST single 201, POST lote 201, GET refleja datos, 400s (sin body, numero no int, valor vacío), upsert re-ejecución
-- [ ] Commit work-unit en `feature/postgres-local`
+- [x] Implementar `POST /api/valores` en `app.py` (single + lote, validación, upsert) — commit fb0992d
+- [x] Verificar: POST single 201, POST lote 201, GET refleja datos, 400s (sin body, numero no int, valor vacío), upsert re-ejecución — commit fb0992d
+- [x] Commit work-unit `fb0992d feat(api): add POST /api/valores bulk upsert endpoint` en `feature/postgres-local`
 
 ## Criterios de aceptación
 - `curl -X POST .../api/valores -d '{"numero":10,"valor":"Valor 10"}'` → 201
@@ -33,4 +33,6 @@ primera pata de la estrategia DUAL de alimentación (API + ODBC).
 - Consulta desde SQLTools muestra los registros nuevos
 
 ## Progreso
-- 2026-09-24: doc creado; tareas pendientes.
+- 2026-09-24: endpoint implementado y verificado (test_client: single 201, lote 201, upsert, 400s; psql: 8 filas). Commit fb0992d.
+- Review assess (RDD, base master): medium — 147 líneas, under_budget → diferida al cierre del slice.
+- Pendiente futuro: añadir `.vscode/` y `*.session.sql` a `.gitignore` (archivos locales de SQLTools que ensucian el status untracked).
