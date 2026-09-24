@@ -30,6 +30,47 @@ def consultar():
         return {'valor': fila['valor']}
     return jsonify({'error': 'Número no encontrado'}), 404
 
+@app.route('/api/valores', methods=['POST'])
+def crear_valores():
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify({'error': 'Body JSON no proporcionado'}), 400
+
+    registros = data if isinstance(data, list) else [data]
+    if not registros:
+        return jsonify({'error': 'Lista vacía'}), 400
+
+    errores = []
+    filas = []
+    for i, reg in enumerate(registros):
+        if not isinstance(reg, dict):
+            errores.append(f'registro {i}: debe ser un objeto JSON')
+            continue
+        numero = reg.get('numero')
+        valor = reg.get('valor')
+        if not isinstance(numero, int) or isinstance(numero, bool):
+            errores.append(f'registro {i}: "numero" debe ser entero')
+        elif not isinstance(valor, str) or not valor.strip():
+            errores.append(f'registro {i}: "valor" debe ser texto no vacío')
+        else:
+            filas.append((numero, valor))
+
+    if errores:
+        return jsonify({'errores': errores}), 400
+
+    conn = get_db()
+    try:
+        c = conn.cursor()
+        c.executemany(
+            'INSERT INTO valores (numero, valor) VALUES (%s, %s) '
+            'ON CONFLICT (numero) DO UPDATE SET valor = EXCLUDED.valor',
+            filas,
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return jsonify({'insertados': len(filas)}), 201
+
 @app.route('/health')
 def health():
     try:
