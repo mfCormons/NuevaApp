@@ -20,6 +20,21 @@ Levantar NuevaApp como web app de producción estándar con PostgreSQL como moto
 - [x] Commit por work-unit: `72493af feat: migrate app from SQLite to PostgreSQL` (branch feature/postgres-local, sin push)
 - [ ] (Siguiente feature/stage) Deploy en VPS: PostgreSQL, gunicorn, systemd, nginx, certbot, ufw
 
+## Server (relevamiento 2026-09-24)
+- Hostinger VPS `srv857300` (69.62.95.88), Ubuntu 22.04.5 LTS, 7.8GB RAM, 97GB disco, Python 3.10.12.
+- Acceso: root por SSH; **el usuario administra el server**.
+- Ya corriendo: nginx (80/443), MySQL (127.0.0.1:3306, bases cormons/cormons_app), 8 gunicorn en 127.0.0.1:8000-8007 para las apps Django (`*.cormons.app`).
+- **NO hay PostgreSQL** → se instala en el server (decidido 2026-09-24, junto a MySQL, conviven).
+- Patrón de deploy existente a replicar: clone como `www-data` en /home/cormons/ → venv → gunicorn_<name>.service en puerto local libre → server block nginx con subdominio *.cormons.app → certbot.
+- Hallazgo de seguridad: `mysql -u root` entra sin contraseña (aviso al administrador, no arreglar en este feature).
+- Progreso deploy:
+  - [x] Repo PGDG agregado (`jammy-pgdg`) + `apt update` OK (warnings de `ubuntu-mirrors.list` duplicado = preexistente, inofensivo)
+  - [x] `postgresql-18` instalado — 18.6 (Ubuntu 18.6-1.pgdg22.04+2), servicio `active`
+  - [x] Post-reinicio needrestart (OK accidental): 22 servicios reiniciados, 0 failed; mysql/nginx/postgresql `active`
+  - [x] Crear rol+base `nuevaapp` en el server (usuario dedicado, menor privilegio)
+  - [x] Verificar conexión TCP `-h 127.0.0.1` (misma que usará la app) — `current_user=nuevaapp | current_database=nuevaapp`
+- Reboot del kernel (5.15.0-164 → 5.15.0-191) queda PENDIENTE: se elige ventana de mantenimiento al final del deploy.
+
 ## Constraints
 - Proyecto de aprendizaje: cambios explicados, sin capa de abstracciones innecesaria.
 - Otros desarrollos en producción en el VPS: cuidado con nginx/ufw/ports.
